@@ -60,7 +60,9 @@ library DoubleQueueModified {
      *
      * Reverts with `Empty` if the queue is empty.
      */
-    function popFront(BytesDeque storage deque) internal returns (bytes memory value) {
+    function popFront(
+        BytesDeque storage deque
+    ) internal returns (bytes memory value) {
         if (empty(deque)) revert Empty();
         int128 frontIndex = deque._begin;
         value = deque._data[frontIndex];
@@ -75,7 +77,9 @@ library DoubleQueueModified {
      *
      * Reverts with `Empty` if the queue is empty.
      */
-    function front(BytesDeque storage deque) internal view returns (bytes memory value) {
+    function front(
+        BytesDeque storage deque
+    ) internal view returns (bytes memory value) {
         if (empty(deque)) revert Empty();
         int128 frontIndex = deque._begin;
         return deque._data[frontIndex];
@@ -87,7 +91,10 @@ library DoubleQueueModified {
      *
      * Reverts with `OutOfBounds` if the index is out of bounds.
      */
-    function at(BytesDeque storage deque, uint256 index) internal view returns (bytes memory value) {
+    function at(
+        BytesDeque storage deque,
+        uint256 index
+    ) internal view returns (bytes memory value) {
         // int256(deque._begin) is a safe upcast
         int128 idx = _toInt128(int256(deque._begin) + _toInt256(index));
         if (idx >= deque._end) revert OutOfBounds();
@@ -101,7 +108,10 @@ library DoubleQueueModified {
 
     function _toInt256(uint256 value) internal pure returns (int256) {
         // Note: Unsafe cast below is okay because `type(int256).max` is guaranteed to be positive
-        require(value <= uint256(type(int256).max), "SafeCast: value doesn't fit in an int256");
+        require(
+            value <= uint256(type(int256).max),
+            "SafeCast: value doesn't fit in an int256"
+        );
         return int256(value);
     }
 

@@ -12,7 +12,11 @@ import "../interfaces/IPriceFeed.sol";
  * @title AssetRegistry
  * @notice Simple registry for managing supported underlying assets with price oracles
  */
-contract AssetRegistry is IAssetRegistry, UUPSUpgradeable, AccessControlUpgradeable {
+contract AssetRegistry is
+    IAssetRegistry,
+    UUPSUpgradeable,
+    AccessControlUpgradeable
+{
     using Math for uint256;
 
     // Custom errors
@@ -20,7 +24,11 @@ contract AssetRegistry is IAssetRegistry, UUPSUpgradeable, AccessControlUpgradea
     error AssetRegistryInvalidStalePeriod(uint256 stalePeriod);
     error AssetRegistryAssetNotSupported(address asset);
     error AssetRegistryInvalidPrice(int256 price);
-    error AssetRegistryStalePriceData(uint256 updatedAt, uint256 currentTime, uint256 maxStale);
+    error AssetRegistryStalePriceData(
+        uint256 updatedAt,
+        uint256 currentTime,
+        uint256 maxStale
+    );
     error AssetRegistryUnsupportedAssetConfiguration();
 
     bytes32 public constant MAINTAINER_ROLE = keccak256("MAINTAINER_ROLE");
@@ -49,7 +57,9 @@ contract AssetRegistry is IAssetRegistry, UUPSUpgradeable, AccessControlUpgradea
         _grantRole(UPGRADE_ROLE, admin);
     }
 
-    function _authorizeUpgrade(address) internal override onlyRole(UPGRADE_ROLE) {}
+    function _authorizeUpgrade(
+        address
+    ) internal override onlyRole(UPGRADE_ROLE) {}
 
     /**
      * @notice Get fresh price from price feed with staleness check
@@ -58,27 +68,45 @@ contract AssetRegistry is IAssetRegistry, UUPSUpgradeable, AccessControlUpgradea
      * @return price The fresh price
      * @return decimals The price feed decimals
      */
-    function _getFreshPrice(address asset, address priceFeed) internal view returns (uint256 price, uint8 decimals) {
-        (uint80 roundId, int256 answer, , uint256 updatedAt, uint80 answeredInRound) = IPriceFeed(priceFeed)
-            .latestRoundData();
+    function _getFreshPrice(
+        address asset,
+        address priceFeed
+    ) internal view returns (uint256 price, uint8 decimals) {
+        (
+            uint80 roundId,
+            int256 answer,
+            ,
+            uint256 updatedAt,
+            uint80 answeredInRound
+        ) = IPriceFeed(priceFeed).latestRoundData();
 
         if (answer <= 0) revert AssetRegistryInvalidPrice(answer);
 
         uint256 assetMaxStalePeriod = _assetConfigs[asset].maxStalePeriod;
         if (block.timestamp - updatedAt > assetMaxStalePeriod) {
-            revert AssetRegistryStalePriceData(updatedAt, block.timestamp, assetMaxStalePeriod);
+            revert AssetRegistryStalePriceData(
+                updatedAt,
+                block.timestamp,
+                assetMaxStalePeriod
+            );
         }
 
         // Check for incomplete round data
         if (answeredInRound < roundId) {
-            revert AssetRegistryStalePriceData(updatedAt, block.timestamp, assetMaxStalePeriod);
+            revert AssetRegistryStalePriceData(
+                updatedAt,
+                block.timestamp,
+                assetMaxStalePeriod
+            );
         }
 
         price = uint256(answer);
         decimals = IPriceFeed(priceFeed).decimals();
     }
 
-    function setAssetConfig(AssetConfig calldata config) external onlyRole(MAINTAINER_ROLE) {
+    function setAssetConfig(
+        AssetConfig calldata config
+    ) external onlyRole(MAINTAINER_ROLE) {
         address asset = config.asset;
         if (asset == address(0)) revert AssetRegistryZeroAddress();
 
@@ -101,22 +129,30 @@ contract AssetRegistry is IAssetRegistry, UUPSUpgradeable, AccessControlUpgradea
     }
 
     function removeAsset(address asset) external onlyRole(MAINTAINER_ROLE) {
-        if (!_assetConfigs[asset].isSupported) revert AssetRegistryAssetNotSupported(asset);
+        if (!_assetConfigs[asset].isSupported)
+            revert AssetRegistryAssetNotSupported(asset);
 
         _assetConfigs[asset].isSupported = false;
         _removeAssetFromArray(asset);
         emit AssetRemoved(asset);
     }
 
-    function getAssetConfig(address asset) external view returns (AssetConfig memory config) {
+    function getAssetConfig(
+        address asset
+    ) external view returns (AssetConfig memory config) {
         return _assetConfigs[asset];
     }
 
-    function isAssetSupported(address asset) external view returns (bool supported) {
+    function isAssetSupported(
+        address asset
+    ) external view returns (bool supported) {
         return _assetConfigs[asset].isSupported;
     }
 
-    function convertFromUnderlying(address _asset, uint256 _amount) external view returns (uint256 amount) {
+    function convertFromUnderlying(
+        address _asset,
+        uint256 _amount
+    ) external view returns (uint256 amount) {
         AssetConfig memory config = _assetConfigs[_asset];
         if (!config.isSupported) revert AssetRegistryAssetNotSupported(_asset);
 
@@ -125,7 +161,10 @@ contract AssetRegistry is IAssetRegistry, UUPSUpgradeable, AccessControlUpgradea
 
         // If asset has price feed, convert to USD value first
         if (config.priceFeed != address(0)) {
-            (uint256 rate, uint8 feedDecimals) = _getFreshPrice(_asset, config.priceFeed);
+            (uint256 rate, uint8 feedDecimals) = _getFreshPrice(
+                _asset,
+                config.priceFeed
+            );
             amount1 = _amount.mulDiv(rate, 10 ** feedDecimals);
         }
 
@@ -133,7 +172,10 @@ contract AssetRegistry is IAssetRegistry, UUPSUpgradeable, AccessControlUpgradea
         amount = amount1 * (10 ** (DECIMALS - assetDecimals));
     }
 
-    function convertToUnderlying(address _asset, uint256 _amount) external view returns (uint256 amount) {
+    function convertToUnderlying(
+        address _asset,
+        uint256 _amount
+    ) external view returns (uint256 amount) {
         AssetConfig memory config = _assetConfigs[_asset];
         if (!config.isSupported) revert AssetRegistryAssetNotSupported(_asset);
 
@@ -145,14 +187,21 @@ contract AssetRegistry is IAssetRegistry, UUPSUpgradeable, AccessControlUpgradea
 
         // If asset has price feed, convert from USD value
         if (config.priceFeed != address(0)) {
-            (uint256 rate, uint8 feedDecimals) = _getFreshPrice(_asset, config.priceFeed);
+            (uint256 rate, uint8 feedDecimals) = _getFreshPrice(
+                _asset,
+                config.priceFeed
+            );
             amount = amount1.mulDiv(10 ** feedDecimals, rate);
         } else {
             amount = amount1;
         }
     }
 
-    function getSupportedAssets() external view returns (address[] memory assets) {
+    function getSupportedAssets()
+        external
+        view
+        returns (address[] memory assets)
+    {
         return _supportedAssets;
     }
 

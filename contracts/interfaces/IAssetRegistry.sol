@@ -30,14 +30,18 @@ interface IAssetRegistry {
      * @param asset The asset address
      * @return config The asset configuration
      */
-    function getAssetConfig(address asset) external view returns (AssetConfig memory config);
+    function getAssetConfig(
+        address asset
+    ) external view returns (AssetConfig memory config);
 
     /**
      * @notice Check if asset is supported
      * @param asset The asset address
      * @return supported True if asset is supported
      */
-    function isAssetSupported(address asset) external view returns (bool supported);
+    function isAssetSupported(
+        address asset
+    ) external view returns (bool supported);
 
     /**
      * @notice Convert asset amount to target token amount
@@ -45,7 +49,10 @@ interface IAssetRegistry {
      * @param _amount The asset amount
      * @return amount The equivalent target token amount
      */
-    function convertFromUnderlying(address _asset, uint256 _amount) external view returns (uint256 amount);
+    function convertFromUnderlying(
+        address _asset,
+        uint256 _amount
+    ) external view returns (uint256 amount);
 
     /**
      * @notice Convert target token amount to asset amount
@@ -53,13 +60,19 @@ interface IAssetRegistry {
      * @param _amount The target token amount
      * @return amount The equivalent asset amount
      */
-    function convertToUnderlying(address _asset, uint256 _amount) external view returns (uint256 amount);
+    function convertToUnderlying(
+        address _asset,
+        uint256 _amount
+    ) external view returns (uint256 amount);
 
     /**
      * @notice Get list of all supported assets
      * @return assets Array of supported asset addresses
      */
-    function getSupportedAssets() external view returns (address[] memory assets);
+    function getSupportedAssets()
+        external
+        view
+        returns (address[] memory assets);
 
     // Events
     event AssetAdded(address indexed asset, AssetConfig config);
