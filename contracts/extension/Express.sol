@@ -304,12 +304,12 @@ contract Express is
 
     /**
      * @notice Perform instant mint of token from underlying asset
-     * @param _underlying The address of the underlying token
+     * @param _asset The address of the underlying token
      * @param _to The address to receive the minted token
      * @param _amount The amount of underlying token to deposit
      */
     function instantMint(
-        address _underlying,
+        address _asset,
         address _to,
         uint256 _amount
     ) external whenNotPausedMint {
@@ -317,7 +317,7 @@ contract Express is
         if (!kycList[from] || !kycList[_to]) revert NotInKycList(from, _to);
         if (_amount == 0) revert InvalidAmount();
 
-        uint256 equivalentAmount = convertFromUnderlying(_underlying, _amount);
+        uint256 equivalentAmount = convertFromUnderlying(_asset, _amount);
 
         if (!firstDeposit[from]) {
             if (equivalentAmount < _firstDepositAmount) {
@@ -336,15 +336,15 @@ contract Express is
         uint256 netAmt;
         uint256 feeAmt;
         uint256 mintAmt;
-        (netAmt, feeAmt, mintAmt) = previewMint(_underlying, _amount);
+        (netAmt, feeAmt, mintAmt) = previewMint(_asset, _amount);
 
         if (feeAmt > 0) {
-            IERC20(_underlying).safeTransferFrom(from, feeTo, feeAmt);
+            IERC20(_asset).safeTransferFrom(from, feeTo, feeAmt);
         }
-        IERC20(_underlying).safeTransferFrom(from, treasury, netAmt);
+        IERC20(_asset).safeTransferFrom(from, treasury, netAmt);
 
         token.mint(_to, mintAmt);
-        emit InstantMint(_underlying, from, _to, _amount, mintAmt, feeAmt);
+        emit InstantMint(_asset, from, _to, _amount, mintAmt, feeAmt);
     }
 
     /**
@@ -440,14 +440,16 @@ contract Express is
             if (!kycList[sender] || !kycList[receiver])
                 revert NotInKycList(sender, receiver);
 
+            uint256 underlyingAmt = convertToUnderlying(underlying, amount);
+
             uint256 availableLiquidity = getTokenBalance(address(underlying));
 
-            if (amount > availableLiquidity) {
+            if (underlyingAmt > availableLiquidity) {
                 break;
             }
 
-            uint256 feeAmt = txsFee(amount, TxType.REDEEM);
-            uint256 receiveAmt = amount - feeAmt;
+            uint256 feeAmt = txsFee(underlyingAmt, TxType.REDEEM);
+            uint256 receiveAmt = underlyingAmt - feeAmt;
 
             redemptionQueue.popFront();
 
