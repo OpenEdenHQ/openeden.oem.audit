@@ -208,6 +208,7 @@ contract Vault is
     ) internal returns (uint256) {
         if (lastActionBlock[_user] == block.number) revert FlashLoanDetected();
         lastActionBlock[_user] = block.number;
+        lastActionBlock[_user] = block.number;
 
         uint256 assets = super.redeem(_shares, redemptionQueue, _user);
 
