@@ -38,6 +38,7 @@ contract Vault is
     error UseUnstakeInstead();
     error VaultPausedTransfers();
     error FlashLoanDetected();
+    error InsufficientOutput(uint256 received, uint256 minimum);
 
     bytes32 public constant PAUSE_ROLE = keccak256("PAUSE_ROLE");
     bytes32 public constant UPGRADE_ROLE = keccak256("UPGRADE_ROLE");
@@ -103,17 +104,27 @@ contract Vault is
         return ERC4626Upgradeable.decimals();
     }
 
-    function stake(uint256 _amount) external returns (uint256) {
+    function stake(
+        uint256 _amount,
+        uint256 _minSharesOut
+    ) external returns (uint256) {
         if (_amount == 0) revert InvalidAmount();
-        return _stake(msg.sender, _amount);
+        uint256 shares = _stake(msg.sender, _amount);
+        if (shares < _minSharesOut)
+            revert InsufficientOutput(shares, _minSharesOut);
+        return shares;
     }
 
     function stakeFor(
         address _user,
-        uint256 _amount
+        uint256 _amount,
+        uint256 _minSharesOut
     ) external returns (uint256) {
         if (_amount == 0) revert InvalidAmount();
-        return _stake(_user, _amount);
+        uint256 shares = _stake(_user, _amount);
+        if (shares < _minSharesOut)
+            revert InsufficientOutput(shares, _minSharesOut);
+        return shares;
     }
 
     function unstake(uint256 _shares) external returns (uint256) {

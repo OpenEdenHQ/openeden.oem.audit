@@ -190,13 +190,13 @@ describe("Invariant Tests", function () {
       // After stake
       const stakeAmount = ethers.parseUnits("1000", 18);
       await oem.connect(user1).approve(await vault.getAddress(), stakeAmount);
-      await vault.connect(user1).stake(stakeAmount);
+      await vault.connect(user1).stake(stakeAmount, 0);
 
       await checkInvariant();
 
       // After another stake
       await oem.connect(user2).approve(await vault.getAddress(), stakeAmount);
-      await vault.connect(user2).stake(stakeAmount);
+      await vault.connect(user2).stake(stakeAmount, 0);
 
       await checkInvariant();
 
@@ -212,7 +212,7 @@ describe("Invariant Tests", function () {
 
       const stakeAmount1 = ethers.parseUnits("1000", 18);
       await oem.connect(user1).approve(await vault.getAddress(), stakeAmount1);
-      await vault.connect(user1).stake(stakeAmount1);
+      await vault.connect(user1).stake(stakeAmount1, 0);
 
       const shares1 = await vault.balanceOf(user1.address);
       const pricePerShare1 = await vault.convertToAssets(
@@ -222,7 +222,7 @@ describe("Invariant Tests", function () {
       // Second user stakes
       const stakeAmount2 = ethers.parseUnits("1000", 18);
       await oem.connect(user2).approve(await vault.getAddress(), stakeAmount2);
-      await vault.connect(user2).stake(stakeAmount2);
+      await vault.connect(user2).stake(stakeAmount2, 0);
 
       const pricePerShare2 = await vault.convertToAssets(
         ethers.parseUnits("1", 24),
@@ -254,7 +254,7 @@ describe("Invariant Tests", function () {
       // Stake
       const stakeAmount = ethers.parseUnits("1000", 18);
       await oem.connect(user1).approve(await vault.getAddress(), stakeAmount);
-      await vault.connect(user1).stake(stakeAmount);
+      await vault.connect(user1).stake(stakeAmount, 0);
 
       await checkInvariant();
 
@@ -276,7 +276,7 @@ describe("Invariant Tests", function () {
 
       const stakeAmount = ethers.parseUnits("1000", 18);
       await oem.connect(user1).approve(await vault.getAddress(), stakeAmount);
-      await vault.connect(user1).stake(stakeAmount);
+      await vault.connect(user1).stake(stakeAmount, 0);
 
       const shares = await vault.balanceOf(user1.address);
 
@@ -299,7 +299,7 @@ describe("Invariant Tests", function () {
       const previewShares = await vault.previewDeposit(stakeAmount);
 
       await oem.connect(user1).approve(await vault.getAddress(), stakeAmount);
-      await vault.connect(user1).stake(stakeAmount);
+      await vault.connect(user1).stake(stakeAmount, 0);
 
       const actualShares = await vault.balanceOf(user1.address);
 
@@ -317,7 +317,7 @@ describe("Invariant Tests", function () {
       // User1 stakes first
       const stakeAmount = ethers.parseUnits("1000", 18);
       await oem.connect(user1).approve(await vault.getAddress(), stakeAmount);
-      await vault.connect(user1).stake(stakeAmount);
+      await vault.connect(user1).stake(stakeAmount, 0);
 
       // Ban user2
       await oem.connect(banlistManager).banAddresses([user2.address]);
@@ -330,8 +330,8 @@ describe("Invariant Tests", function () {
 
       // Can't stake for banned user
       await oem.connect(user1).approve(await vault.getAddress(), stakeAmount);
-      await expect(vault.connect(user1).stakeFor(user2.address, stakeAmount)).to
-        .be.reverted;
+      await expect(vault.connect(user1).stakeFor(user2.address, stakeAmount, 0))
+        .to.be.reverted;
     });
 
     it("INVARIANT: When paused, vault operations should be blocked", async function () {
@@ -340,7 +340,7 @@ describe("Invariant Tests", function () {
 
       const stakeAmount = ethers.parseUnits("1000", 18);
       await oem.connect(user1).approve(await vault.getAddress(), stakeAmount);
-      await vault.connect(user1).stake(stakeAmount);
+      await vault.connect(user1).stake(stakeAmount, 0);
 
       // Approve for user2 as well
       await oem.connect(user2).approve(await vault.getAddress(), stakeAmount);
@@ -349,7 +349,7 @@ describe("Invariant Tests", function () {
 
       // Can't stake (minting shares triggers _update which checks paused)
       await expect(
-        vault.connect(user2).stake(stakeAmount),
+        vault.connect(user2).stake(stakeAmount, 0),
       ).to.be.revertedWithCustomError(vault, "VaultPausedTransfers");
 
       // Can't unstake (burning shares triggers _update which checks paused)
@@ -372,7 +372,7 @@ describe("Invariant Tests", function () {
 
       const stakeAmount = ethers.parseUnits("3000", 18);
       await oem.connect(user1).approve(await vault.getAddress(), stakeAmount);
-      await vault.connect(user1).stake(stakeAmount);
+      await vault.connect(user1).stake(stakeAmount, 0);
 
       const totalShares = await vault.balanceOf(user1.address);
 
@@ -402,7 +402,7 @@ describe("Invariant Tests", function () {
 
       const stakeAmount = ethers.parseUnits("1000", 18);
       await oem.connect(user1).approve(await vault.getAddress(), stakeAmount);
-      await vault.connect(user1).stake(stakeAmount);
+      await vault.connect(user1).stake(stakeAmount, 0);
 
       const shares = await vault.balanceOf(user1.address);
       await vault.connect(user1).unstake(shares);
@@ -428,7 +428,7 @@ describe("Invariant Tests", function () {
 
       const stakeAmount = ethers.parseUnits("1000", 18);
       await oem.connect(user1).approve(await vault.getAddress(), stakeAmount);
-      await vault.connect(user1).stake(stakeAmount);
+      await vault.connect(user1).stake(stakeAmount, 0);
 
       const shares = await vault.balanceOf(user1.address);
       await vault.connect(user1).unstake(shares);
@@ -450,7 +450,7 @@ describe("Invariant Tests", function () {
 
       const stakeAmount = ethers.parseUnits("3000", 18);
       await oem.connect(user1).approve(await vault.getAddress(), stakeAmount);
-      await vault.connect(user1).stake(stakeAmount);
+      await vault.connect(user1).stake(stakeAmount, 0);
 
       const totalShares = await vault.balanceOf(user1.address);
 
@@ -483,7 +483,7 @@ describe("Invariant Tests", function () {
 
       const stakeAmount = ethers.parseUnits("1000", 18);
       await oem.connect(user1).approve(await vault.getAddress(), stakeAmount);
-      await vault.connect(user1).stake(stakeAmount);
+      await vault.connect(user1).stake(stakeAmount, 0);
 
       const shares = await vault.balanceOf(user1.address);
       const previewAssets = await vault.previewRedeem(shares);
@@ -534,7 +534,7 @@ describe("Invariant Tests", function () {
       // Stake
       const stakeAmount = ethers.parseUnits("1000", 18);
       await oem.connect(user1).approve(await vault.getAddress(), stakeAmount);
-      await vault.connect(user1).stake(stakeAmount);
+      await vault.connect(user1).stake(stakeAmount, 0);
 
       await checkInvariant();
 
@@ -552,10 +552,10 @@ describe("Invariant Tests", function () {
       const stakeAmount = ethers.parseUnits("1000", 18);
 
       await oem.connect(user1).approve(await vault.getAddress(), stakeAmount);
-      await vault.connect(user1).stake(stakeAmount);
+      await vault.connect(user1).stake(stakeAmount, 0);
 
       await oem.connect(user2).approve(await vault.getAddress(), stakeAmount);
-      await vault.connect(user2).stake(stakeAmount);
+      await vault.connect(user2).stake(stakeAmount, 0);
 
       const user1Shares = await vault.balanceOf(user1.address);
       const user2Shares = await vault.balanceOf(user2.address);
@@ -576,10 +576,10 @@ describe("Invariant Tests", function () {
       const stakeAmount2 = ethers.parseUnits("1000", 18);
 
       await oem.connect(user1).approve(await vault.getAddress(), stakeAmount1);
-      await vault.connect(user1).stake(stakeAmount1);
+      await vault.connect(user1).stake(stakeAmount1, 0);
 
       await oem.connect(user2).approve(await vault.getAddress(), stakeAmount2);
-      await vault.connect(user2).stake(stakeAmount2);
+      await vault.connect(user2).stake(stakeAmount2, 0);
 
       // Unstake
       const shares1 = await vault.balanceOf(user1.address);

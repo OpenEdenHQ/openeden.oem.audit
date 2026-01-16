@@ -21,13 +21,13 @@ describe("Core Integration Tests", function () {
       const stakeAmount3 = ethers.parseUnits("1500", 18);
 
       await oem.connect(user1).approve(await vault.getAddress(), stakeAmount1);
-      await vault.connect(user1).stake(stakeAmount1);
+      await vault.connect(user1).stake(stakeAmount1, 0);
 
       await oem.connect(user2).approve(await vault.getAddress(), stakeAmount2);
-      await vault.connect(user2).stake(stakeAmount2);
+      await vault.connect(user2).stake(stakeAmount2, 0);
 
       await oem.connect(user3).approve(await vault.getAddress(), stakeAmount3);
-      await vault.connect(user3).stake(stakeAmount3);
+      await vault.connect(user3).stake(stakeAmount3, 0);
 
       // Verify total assets
       const totalAssets = await vault.totalAssets();
@@ -58,17 +58,17 @@ describe("Core Integration Tests", function () {
 
       // User1 stakes
       await oem.connect(user1).approve(await vault.getAddress(), stakeAmount);
-      await vault.connect(user1).stake(stakeAmount);
+      await vault.connect(user1).stake(stakeAmount, 0);
       const shares1 = await vault.balanceOf(user1.address);
 
       // User2 stakes same amount
       await oem.connect(user2).approve(await vault.getAddress(), stakeAmount);
-      await vault.connect(user2).stake(stakeAmount);
+      await vault.connect(user2).stake(stakeAmount, 0);
       const shares2 = await vault.balanceOf(user2.address);
 
       // User3 stakes same amount
       await oem.connect(user3).approve(await vault.getAddress(), stakeAmount);
-      await vault.connect(user3).stake(stakeAmount);
+      await vault.connect(user3).stake(stakeAmount, 0);
       const shares3 = await vault.balanceOf(user3.address);
 
       // All should get equal shares
@@ -82,7 +82,7 @@ describe("Core Integration Tests", function () {
 
       const stakeAmount = ethers.parseUnits("3000", 18);
       await oem.connect(user1).approve(await vault.getAddress(), stakeAmount);
-      await vault.connect(user1).stake(stakeAmount);
+      await vault.connect(user1).stake(stakeAmount, 0);
 
       const totalShares = await vault.balanceOf(user1.address);
 
@@ -143,7 +143,7 @@ describe("Core Integration Tests", function () {
       // Stake transfers OEM from user to vault first
       // The OEM transfer checks if sender is banned, so it reverts with BannedSender
       await expect(
-        vault.connect(user1).stake(stakeAmount),
+        vault.connect(user1).stake(stakeAmount, 0),
       ).to.be.revertedWithCustomError(oem, "BannedSender");
     });
 
@@ -154,7 +154,7 @@ describe("Core Integration Tests", function () {
       // User1 stakes first
       const stakeAmount = ethers.parseUnits("1000", 18);
       await oem.connect(user1).approve(await vault.getAddress(), stakeAmount);
-      await vault.connect(user1).stake(stakeAmount);
+      await vault.connect(user1).stake(stakeAmount, 0);
 
       const shares = await vault.balanceOf(user1.address);
 
@@ -183,7 +183,7 @@ describe("Core Integration Tests", function () {
       // Should work normally
       const stakeAmount = ethers.parseUnits("1000", 18);
       await oem.connect(user1).approve(await vault.getAddress(), stakeAmount);
-      await vault.connect(user1).stake(stakeAmount);
+      await vault.connect(user1).stake(stakeAmount, 0);
 
       const shares = await vault.balanceOf(user1.address);
       await vault.connect(user1).transfer(user2.address, shares / 2n);
@@ -198,7 +198,7 @@ describe("Core Integration Tests", function () {
       // User1 stakes
       const stakeAmount = ethers.parseUnits("1000", 18);
       await oem.connect(user1).approve(await vault.getAddress(), stakeAmount);
-      await vault.connect(user1).stake(stakeAmount);
+      await vault.connect(user1).stake(stakeAmount, 0);
 
       // Ban user2
       await oem.connect(banlistManager).banAddresses([user2.address]);
@@ -218,7 +218,7 @@ describe("Core Integration Tests", function () {
       // Stake and unstake
       const stakeAmount = ethers.parseUnits("1000", 18);
       await oem.connect(user1).approve(await vault.getAddress(), stakeAmount);
-      await vault.connect(user1).stake(stakeAmount);
+      await vault.connect(user1).stake(stakeAmount, 0);
 
       const shares = await vault.balanceOf(user1.address);
       await vault.connect(user1).unstake(shares);
@@ -245,7 +245,7 @@ describe("Core Integration Tests", function () {
       // User1 stakes first
       const stakeAmount = ethers.parseUnits("1000", 18);
       await oem.connect(user1).approve(await vault.getAddress(), stakeAmount);
-      await vault.connect(user1).stake(stakeAmount);
+      await vault.connect(user1).stake(stakeAmount, 0);
 
       // Setup user2 for testing
       await oem.connect(user2).approve(await vault.getAddress(), stakeAmount);
@@ -255,7 +255,7 @@ describe("Core Integration Tests", function () {
 
       // Can't stake (minting shares triggers _update which checks paused)
       await expect(
-        vault.connect(user2).stake(stakeAmount),
+        vault.connect(user2).stake(stakeAmount, 0),
       ).to.be.revertedWithCustomError(vault, "VaultPausedTransfers");
 
       // Can't unstake (burning shares triggers _update which checks paused)
@@ -276,7 +276,7 @@ describe("Core Integration Tests", function () {
 
       const stakeAmount = ethers.parseUnits("1000", 18);
       await oem.connect(user1).approve(await vault.getAddress(), stakeAmount);
-      await vault.connect(user1).stake(stakeAmount);
+      await vault.connect(user1).stake(stakeAmount, 0);
 
       // Pause and unpause
       await vault.connect(pauser).pause();
@@ -300,7 +300,7 @@ describe("Core Integration Tests", function () {
 
       // Can't stake (OEM transfer fails)
       await expect(
-        vault.connect(user1).stake(stakeAmount),
+        vault.connect(user1).stake(stakeAmount, 0),
       ).to.be.revertedWithCustomError(oem, "EnforcedPause");
     });
   });
@@ -344,7 +344,8 @@ describe("Core Integration Tests", function () {
       const stakeAmount = ethers.parseUnits("1000", 18);
       await oem.connect(user1).approve(await vault.getAddress(), stakeAmount);
 
-      await expect(vault.connect(user1).stake(stakeAmount)).to.not.be.reverted;
+      await expect(vault.connect(user1).stake(stakeAmount, 0)).to.not.be
+        .reverted;
     });
   });
 
@@ -426,7 +427,7 @@ describe("Core Integration Tests", function () {
       // Stake and unstake with original vault
       const stakeAmount = ethers.parseUnits("1000", 18);
       await oem.connect(user1).approve(await vault.getAddress(), stakeAmount);
-      await vault.connect(user1).stake(stakeAmount);
+      await vault.connect(user1).stake(stakeAmount, 0);
 
       const shares = await vault.balanceOf(user1.address);
       await vault.connect(user1).unstake(shares);
@@ -465,7 +466,7 @@ describe("Core Integration Tests", function () {
       // Queue redemption with 7-day delay
       const stakeAmount = ethers.parseUnits("1000", 18);
       await oem.connect(user1).approve(await vault.getAddress(), stakeAmount);
-      await vault.connect(user1).stake(stakeAmount);
+      await vault.connect(user1).stake(stakeAmount, 0);
 
       const shares = await vault.balanceOf(user1.address);
       await vault.connect(user1).unstake(shares);
@@ -481,7 +482,7 @@ describe("Core Integration Tests", function () {
 
       // New redemption should use new delay
       await oem.connect(user1).approve(await vault.getAddress(), stakeAmount);
-      await vault.connect(user1).stake(stakeAmount);
+      await vault.connect(user1).stake(stakeAmount, 0);
 
       const shares2 = await vault.balanceOf(user1.address);
       await vault.connect(user1).unstake(shares2);
@@ -514,7 +515,7 @@ describe("Core Integration Tests", function () {
       // Stake
       const stakeAmount = ethers.parseUnits("1000", 18);
       await oem.connect(user1).approve(await vault.getAddress(), stakeAmount);
-      await vault.connect(user1).stake(stakeAmount);
+      await vault.connect(user1).stake(stakeAmount, 0);
 
       const shares = await vault.balanceOf(user1.address);
 
@@ -544,7 +545,7 @@ describe("Core Integration Tests", function () {
       // Create redemption
       const stakeAmount = ethers.parseUnits("1000", 18);
       await oem.connect(user1).approve(await vault.getAddress(), stakeAmount);
-      await vault.connect(user1).stake(stakeAmount);
+      await vault.connect(user1).stake(stakeAmount, 0);
 
       const shares = await vault.balanceOf(user1.address);
       await vault.connect(user1).unstake(shares);
@@ -570,7 +571,7 @@ describe("Core Integration Tests", function () {
       // Stake and unstake
       const stakeAmount = ethers.parseUnits("1000", 18);
       await oem.connect(user1).approve(await vault.getAddress(), stakeAmount);
-      await vault.connect(user1).stake(stakeAmount);
+      await vault.connect(user1).stake(stakeAmount, 0);
 
       const shares = await vault.balanceOf(user1.address);
       await vault.connect(user1).unstake(shares);
@@ -594,7 +595,7 @@ describe("Core Integration Tests", function () {
       // Multiple users stake in sequence
       for (const user of [user1, user2, user3]) {
         await oem.connect(user).approve(await vault.getAddress(), stakeAmount);
-        await vault.connect(user).stake(stakeAmount);
+        await vault.connect(user).stake(stakeAmount, 0);
       }
 
       // Total assets should be correct
@@ -608,7 +609,7 @@ describe("Core Integration Tests", function () {
       // Stake large amount
       const totalStake = ethers.parseUnits("10000", 18);
       await oem.connect(user1).approve(await vault.getAddress(), totalStake);
-      await vault.connect(user1).stake(totalStake);
+      await vault.connect(user1).stake(totalStake, 0);
 
       const totalShares = await vault.balanceOf(user1.address);
       const unstakeAmount = totalShares / 20n;
@@ -635,12 +636,12 @@ describe("Core Integration Tests", function () {
       // Stake odd amount
       const stakeAmount1 = ethers.parseUnits("1000", 18) + 1n;
       await oem.connect(user1).approve(await vault.getAddress(), stakeAmount1);
-      await vault.connect(user1).stake(stakeAmount1);
+      await vault.connect(user1).stake(stakeAmount1, 0);
 
       // Second stake with exact amount
       const stakeAmount2 = ethers.parseUnits("1000", 18);
       await oem.connect(user2).approve(await vault.getAddress(), stakeAmount2);
-      await vault.connect(user2).stake(stakeAmount2);
+      await vault.connect(user2).stake(stakeAmount2, 0);
 
       // Both should receive shares
       expect(await vault.balanceOf(user1.address)).to.be.gt(0);
@@ -661,7 +662,7 @@ describe("Core Integration Tests", function () {
       await oem.connect(minter).mint(user1.address, dustAmount);
       await oem.connect(user1).approve(await vault.getAddress(), dustAmount);
 
-      await vault.connect(user1).stake(dustAmount);
+      await vault.connect(user1).stake(dustAmount, 0);
 
       const shares = await vault.balanceOf(user1.address);
       expect(shares).to.be.gt(0);
@@ -676,7 +677,7 @@ describe("Core Integration Tests", function () {
       // Initial stake
       const stakeAmount1 = ethers.parseUnits("2000", 18);
       await oem.connect(user1).approve(await vault.getAddress(), stakeAmount1);
-      await vault.connect(user1).stake(stakeAmount1);
+      await vault.connect(user1).stake(stakeAmount1, 0);
 
       let shares = await vault.balanceOf(user1.address);
 
@@ -688,7 +689,7 @@ describe("Core Integration Tests", function () {
       // Stake more
       const stakeAmount2 = ethers.parseUnits("1000", 18);
       await oem.connect(user1).approve(await vault.getAddress(), stakeAmount2);
-      await vault.connect(user1).stake(stakeAmount2);
+      await vault.connect(user1).stake(stakeAmount2, 0);
 
       shares = await vault.balanceOf(user1.address);
 
@@ -706,7 +707,7 @@ describe("Core Integration Tests", function () {
       // Stake
       const stakeAmount = ethers.parseUnits("1000", 18);
       await oem.connect(user1).approve(await vault.getAddress(), stakeAmount);
-      await vault.connect(user1).stake(stakeAmount);
+      await vault.connect(user1).stake(stakeAmount, 0);
 
       const shares = await vault.balanceOf(user1.address);
 
@@ -728,7 +729,7 @@ describe("Core Integration Tests", function () {
       // Stake before upgrade
       const stakeAmount = ethers.parseUnits("1000", 18);
       await oem.connect(user1).approve(await vault.getAddress(), stakeAmount);
-      await vault.connect(user1).stake(stakeAmount);
+      await vault.connect(user1).stake(stakeAmount, 0);
 
       const sharesBefore = await vault.balanceOf(user1.address);
       const totalAssetsBefore = await vault.totalAssets();
@@ -752,8 +753,8 @@ describe("Core Integration Tests", function () {
       await oem
         .connect(user1)
         .approve(await upgradedVault.getAddress(), newStakeAmount);
-      await expect(upgradedVault.connect(user1).stake(newStakeAmount)).to.not.be
-        .reverted;
+      await expect(upgradedVault.connect(user1).stake(newStakeAmount, 0)).to.not
+        .be.reverted;
     });
   });
 });

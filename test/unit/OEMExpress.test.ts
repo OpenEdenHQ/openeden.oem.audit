@@ -258,7 +258,7 @@ describe("Express", function () {
         await expect(
           express
             .connect(user1)
-            .instantMint(await usdo.getAddress(), user1.address, mintAmount),
+            .instantMint(await usdo.getAddress(), user1.address, mintAmount, 0),
         )
           .to.emit(express, "InstantMint")
           .withArgs(
@@ -283,7 +283,7 @@ describe("Express", function () {
         const firstDeposit = ethers.parseUnits("1000", 18);
         await express
           .connect(user1)
-          .instantMint(await usdo.getAddress(), user1.address, firstDeposit);
+          .instantMint(await usdo.getAddress(), user1.address, firstDeposit, 0);
 
         // Subsequent mint with minimum amount
         const mintAmount = ethers.parseUnits("100", 18);
@@ -291,7 +291,7 @@ describe("Express", function () {
 
         await express
           .connect(user1)
-          .instantMint(await usdo.getAddress(), user1.address, mintAmount);
+          .instantMint(await usdo.getAddress(), user1.address, mintAmount, 0);
 
         expect(await oem.balanceOf(user1.address)).to.equal(
           balanceBefore + mintAmount,
@@ -307,7 +307,7 @@ describe("Express", function () {
 
         await express
           .connect(user1)
-          .instantMint(await usdo.getAddress(), user2.address, mintAmount);
+          .instantMint(await usdo.getAddress(), user2.address, mintAmount, 0);
 
         expect(await oem.balanceOf(user2.address)).to.equal(
           balanceBefore + mintAmount,
@@ -323,7 +323,7 @@ describe("Express", function () {
 
         await express
           .connect(user1)
-          .instantMint(await usdo.getAddress(), user1.address, mintAmount);
+          .instantMint(await usdo.getAddress(), user1.address, mintAmount, 0);
 
         expect(await usdo.balanceOf(treasury.address)).to.equal(
           treasuryBalanceBefore + mintAmount,
@@ -346,7 +346,7 @@ describe("Express", function () {
 
         await express
           .connect(user1)
-          .instantMint(await usdo.getAddress(), user1.address, mintAmount);
+          .instantMint(await usdo.getAddress(), user1.address, mintAmount, 0);
 
         expect(await usdo.balanceOf(treasury.address)).to.equal(
           treasuryBalanceBefore + expectedNet,
@@ -364,7 +364,7 @@ describe("Express", function () {
 
         await express
           .connect(user1)
-          .instantMint(await usdo.getAddress(), user1.address, mintAmount);
+          .instantMint(await usdo.getAddress(), user1.address, mintAmount, 0);
 
         expect(await oem.balanceOf(user1.address)).to.equal(
           balanceBefore + mintAmount,
@@ -385,7 +385,7 @@ describe("Express", function () {
         await expect(
           express
             .connect(user1)
-            .instantMint(await usdo.getAddress(), user1.address, mintAmount),
+            .instantMint(await usdo.getAddress(), user1.address, mintAmount, 0),
         ).to.be.revertedWithCustomError(express, "NotInKycList");
       });
 
@@ -401,7 +401,7 @@ describe("Express", function () {
         await expect(
           express
             .connect(user1)
-            .instantMint(await usdo.getAddress(), user2.address, mintAmount),
+            .instantMint(await usdo.getAddress(), user2.address, mintAmount, 0),
         ).to.be.revertedWithCustomError(express, "NotInKycList");
       });
 
@@ -413,7 +413,7 @@ describe("Express", function () {
         await expect(
           express
             .connect(user1)
-            .instantMint(await usdo.getAddress(), user1.address, mintAmount),
+            .instantMint(await usdo.getAddress(), user1.address, mintAmount, 0),
         ).to.be.revertedWithCustomError(
           express,
           "FirstDepositLessThanRequired",
@@ -430,6 +430,7 @@ describe("Express", function () {
             await usdo.getAddress(),
             user1.address,
             ethers.parseUnits("1000", 18),
+            0,
           );
 
         // Try to mint below minimum
@@ -438,7 +439,7 @@ describe("Express", function () {
         await expect(
           express
             .connect(user1)
-            .instantMint(await usdo.getAddress(), user1.address, mintAmount),
+            .instantMint(await usdo.getAddress(), user1.address, mintAmount, 0),
         ).to.be.revertedWithCustomError(express, "MintLessThanMinimum");
       });
 
@@ -448,7 +449,7 @@ describe("Express", function () {
         await expect(
           express
             .connect(user1)
-            .instantMint(await usdo.getAddress(), user1.address, 0),
+            .instantMint(await usdo.getAddress(), user1.address, 0, 0),
         ).to.be.revertedWithCustomError(express, "InvalidAmount");
       });
 
@@ -463,7 +464,7 @@ describe("Express", function () {
         await expect(
           express
             .connect(user1)
-            .instantMint(await usdo.getAddress(), user1.address, mintAmount),
+            .instantMint(await usdo.getAddress(), user1.address, mintAmount, 0),
         ).to.be.reverted;
       });
 
@@ -476,7 +477,7 @@ describe("Express", function () {
         await expect(
           express
             .connect(user1)
-            .instantMint(await usdo.getAddress(), user1.address, mintAmount),
+            .instantMint(await usdo.getAddress(), user1.address, mintAmount, 0),
         ).to.be.reverted;
       });
     });
@@ -488,7 +489,7 @@ describe("Express", function () {
         const mintAmount = ethers.parseUnits("1000", 18); // Exact first deposit
         await express
           .connect(user1)
-          .instantMint(await usdo.getAddress(), user1.address, mintAmount);
+          .instantMint(await usdo.getAddress(), user1.address, mintAmount, 0);
 
         expect(await express.firstDeposit(user1.address)).to.be.true;
       });
@@ -502,12 +503,13 @@ describe("Express", function () {
             await usdo.getAddress(),
             user1.address,
             ethers.parseUnits("1000", 18),
+            0,
           );
 
         const mintAmount = ethers.parseUnits("100", 18); // Exact minimum
         await express
           .connect(user1)
-          .instantMint(await usdo.getAddress(), user1.address, mintAmount);
+          .instantMint(await usdo.getAddress(), user1.address, mintAmount, 0);
 
         expect(await oem.balanceOf(user1.address)).to.be.gt(0);
       });
@@ -522,7 +524,7 @@ describe("Express", function () {
         const mintAmount = ethers.parseUnits("1000", 18);
         await express
           .connect(user1)
-          .instantMint(await usdo.getAddress(), user1.address, mintAmount);
+          .instantMint(await usdo.getAddress(), user1.address, mintAmount, 0);
       });
 
       it("should handle high fee rate", async function () {
@@ -538,7 +540,7 @@ describe("Express", function () {
 
         await express
           .connect(user1)
-          .instantMint(await usdo.getAddress(), user1.address, mintAmount);
+          .instantMint(await usdo.getAddress(), user1.address, mintAmount, 0);
 
         expect(await oem.balanceOf(user1.address)).to.equal(expectedUsdox);
       });
@@ -611,6 +613,7 @@ describe("Express", function () {
             await usdo.getAddress(),
             user1.address,
             ethers.parseUnits("1000", 18),
+            0,
           );
 
         const redeemAmount = ethers.parseUnits("500", 18);
@@ -634,6 +637,7 @@ describe("Express", function () {
             await usdo.getAddress(),
             user1.address,
             ethers.parseUnits("1000", 18),
+            0,
           );
 
         const redeemAmount = ethers.parseUnits("500", 18);
@@ -659,6 +663,7 @@ describe("Express", function () {
             await usdo.getAddress(),
             user1.address,
             ethers.parseUnits("1000", 18),
+            0,
           );
         await express
           .connect(user2)
@@ -666,6 +671,7 @@ describe("Express", function () {
             await usdo.getAddress(),
             user2.address,
             ethers.parseUnits("1000", 18),
+            0,
           );
 
         const redeemAmount1 = ethers.parseUnits("300", 18);
@@ -697,6 +703,7 @@ describe("Express", function () {
             await usdo.getAddress(),
             user1.address,
             ethers.parseUnits("2000", 18),
+            0,
           );
 
         const redeemAmount1 = ethers.parseUnits("300", 18);
@@ -729,6 +736,7 @@ describe("Express", function () {
             await usdo.getAddress(),
             user1.address,
             ethers.parseUnits("1000", 18),
+            0,
           );
 
         const redeemAmount = ethers.parseUnits("500", 18);
@@ -755,6 +763,7 @@ describe("Express", function () {
             await usdo.getAddress(),
             user1.address,
             ethers.parseUnits("1000", 18),
+            0,
           );
 
         await express.connect(whitelister).revokeKycInBulk([user1.address]);
@@ -779,6 +788,7 @@ describe("Express", function () {
             await usdo.getAddress(),
             user1.address,
             ethers.parseUnits("1000", 18),
+            0,
           );
 
         await express.connect(whitelister).revokeKycInBulk([user2.address]);
@@ -811,6 +821,7 @@ describe("Express", function () {
             await usdo.getAddress(),
             user1.address,
             ethers.parseUnits("1000", 18),
+            0,
           );
 
         await express.connect(pauser).pauseRedeem();
@@ -852,6 +863,7 @@ describe("Express", function () {
           await usdo.getAddress(),
           user1.address,
           ethers.parseUnits("2000", 18),
+          0,
         );
       await express
         .connect(user2)
@@ -859,6 +871,7 @@ describe("Express", function () {
           await usdo.getAddress(),
           user2.address,
           ethers.parseUnits("2000", 18),
+          0,
         );
 
       // Queue redemptions
@@ -1047,6 +1060,7 @@ describe("Express", function () {
           await usdo.getAddress(),
           user1.address,
           ethers.parseUnits("2000", 18),
+          0,
         );
       await express
         .connect(user2)
@@ -1054,6 +1068,7 @@ describe("Express", function () {
           await usdo.getAddress(),
           user2.address,
           ethers.parseUnits("2000", 18),
+          0,
         );
 
       await oem
@@ -1480,6 +1495,7 @@ describe("Express", function () {
               await usdo.getAddress(),
               user1.address,
               ethers.parseUnits("1000", 18),
+              0,
             ),
         ).to.be.reverted;
       });
@@ -1498,6 +1514,7 @@ describe("Express", function () {
               await usdo.getAddress(),
               user1.address,
               ethers.parseUnits("1000", 18),
+              0,
             ),
         ).to.not.be.reverted;
       });
@@ -1560,6 +1577,7 @@ describe("Express", function () {
             await usdo.getAddress(),
             user1.address,
             ethers.parseUnits("1000", 18),
+            0,
           );
 
         await express.connect(pauser).pauseRedeem();
@@ -1585,6 +1603,7 @@ describe("Express", function () {
             await usdo.getAddress(),
             user1.address,
             ethers.parseUnits("1000", 18),
+            0,
           );
 
         await express.connect(pauser).pauseRedeem();
@@ -1694,6 +1713,7 @@ describe("Express", function () {
           await usdo.getAddress(),
           user1.address,
           ethers.parseUnits("1000", 18),
+          0,
         );
 
       const redeemAmount = ethers.parseUnits("500", 18);
@@ -1812,7 +1832,7 @@ describe("Express", function () {
       const mintAmount = ethers.parseUnits("2000", 18);
       await express
         .connect(user1)
-        .instantMint(await usdo.getAddress(), user1.address, mintAmount);
+        .instantMint(await usdo.getAddress(), user1.address, mintAmount, 0);
 
       // Redeem request
       const redeemAmount = ethers.parseUnits("1000", 18);
@@ -1838,6 +1858,7 @@ describe("Express", function () {
           await usdo.getAddress(),
           user1.address,
           ethers.parseUnits("2000", 18),
+          0,
         );
 
       // User2 mints
@@ -1847,6 +1868,7 @@ describe("Express", function () {
           await usdo.getAddress(),
           user2.address,
           ethers.parseUnits("3000", 18),
+          0,
         );
 
       // User3 mints
@@ -1856,6 +1878,7 @@ describe("Express", function () {
           await usdo.getAddress(),
           user3.address,
           ethers.parseUnits("1500", 18),
+          0,
         );
 
       // User1 redeems
@@ -1891,6 +1914,7 @@ describe("Express", function () {
           await usdo.getAddress(),
           user1.address,
           ethers.parseUnits("2000", 18),
+          0,
         );
 
       // Change fees
@@ -1916,7 +1940,7 @@ describe("Express", function () {
       const mintAmount = ethers.parseUnits("1000", 18);
       await express
         .connect(user1)
-        .instantMint(await usdo.getAddress(), user1.address, mintAmount);
+        .instantMint(await usdo.getAddress(), user1.address, mintAmount, 0);
 
       expect(await usdo.balanceOf(user1.address)).to.be.gte(0);
     });
@@ -1932,6 +1956,7 @@ describe("Express", function () {
           await usdo.getAddress(),
           user1.address,
           ethers.parseUnits("2000", 18),
+          0,
         );
 
       // Pause redeem
@@ -1974,6 +1999,7 @@ describe("Express", function () {
           await usdo.getAddress(),
           user1.address,
           ethers.parseUnits("2000", 18),
+          0,
         );
 
       const oemBalance = await oem.balanceOf(user1.address);
@@ -2014,6 +2040,7 @@ describe("Express", function () {
           await usdo.getAddress(),
           user1.address,
           ethers.parseUnits("1000", 18),
+          0,
         );
       expect(await express.firstDeposit(user1.address)).to.be.true;
       expect(await express.firstDeposit(user2.address)).to.be.false;
@@ -2025,6 +2052,7 @@ describe("Express", function () {
           await usdo.getAddress(),
           user2.address,
           ethers.parseUnits("1000", 18),
+          0,
         );
       expect(await express.firstDeposit(user1.address)).to.be.true;
       expect(await express.firstDeposit(user2.address)).to.be.true;
@@ -2041,10 +2069,10 @@ describe("Express", function () {
       // Should work with tiny amounts after first deposit
       await express
         .connect(user1)
-        .instantMint(await usdo.getAddress(), user1.address, 1);
+        .instantMint(await usdo.getAddress(), user1.address, 1, 0);
       await express
         .connect(user1)
-        .instantMint(await usdo.getAddress(), user1.address, 1);
+        .instantMint(await usdo.getAddress(), user1.address, 1, 0);
     });
   });
 });

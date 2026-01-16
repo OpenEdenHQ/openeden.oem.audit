@@ -140,7 +140,7 @@ describe("OEMVault", function () {
 
       const sharesBefore = await vault.balanceOf(user1.address);
 
-      await vault.connect(user1).stake(stakeAmount);
+      await vault.connect(user1).stake(stakeAmount, 0);
 
       const sharesAfter = await vault.balanceOf(user1.address);
       expect(sharesAfter).to.be.gt(sharesBefore);
@@ -153,7 +153,7 @@ describe("OEMVault", function () {
 
       await oem.connect(user1).approve(await vault.getAddress(), stakeAmount);
 
-      const tx = vault.connect(user1).stake(stakeAmount);
+      const tx = vault.connect(user1).stake(stakeAmount, 0);
 
       await expect(tx).to.emit(vault, "Staked");
     });
@@ -165,7 +165,7 @@ describe("OEMVault", function () {
       const userBalanceBefore = await oem.balanceOf(user1.address);
 
       await oem.connect(user1).approve(await vault.getAddress(), stakeAmount);
-      await vault.connect(user1).stake(stakeAmount);
+      await vault.connect(user1).stake(stakeAmount, 0);
 
       const userBalanceAfter = await oem.balanceOf(user1.address);
       expect(userBalanceBefore - userBalanceAfter).to.equal(stakeAmount);
@@ -178,7 +178,7 @@ describe("OEMVault", function () {
       const totalAssetsBefore = await vault.totalAssets();
 
       await oem.connect(user1).approve(await vault.getAddress(), stakeAmount);
-      await vault.connect(user1).stake(stakeAmount);
+      await vault.connect(user1).stake(stakeAmount, 0);
 
       const totalAssetsAfter = await vault.totalAssets();
       expect(totalAssetsAfter - totalAssetsBefore).to.equal(stakeAmount);
@@ -187,10 +187,9 @@ describe("OEMVault", function () {
     it("should revert when staking zero amount", async function () {
       const { vault, user1 } = await loadFixture(deployFixture);
 
-      await expect(vault.connect(user1).stake(0)).to.be.revertedWithCustomError(
-        vault,
-        "InvalidAmount",
-      );
+      await expect(
+        vault.connect(user1).stake(0, 0),
+      ).to.be.revertedWithCustomError(vault, "InvalidAmount");
     });
 
     it("should revert when insufficient allowance", async function () {
@@ -199,7 +198,7 @@ describe("OEMVault", function () {
       const stakeAmount = ethers.parseUnits("1000", 18);
 
       await expect(
-        vault.connect(user1).stake(stakeAmount),
+        vault.connect(user1).stake(stakeAmount, 0),
       ).to.be.revertedWithCustomError(vault, "ERC20InsufficientAllowance");
     });
 
@@ -212,7 +211,7 @@ describe("OEMVault", function () {
       await oem.connect(user1).approve(await vault.getAddress(), excessAmount);
 
       await expect(
-        vault.connect(user1).stake(excessAmount),
+        vault.connect(user1).stake(excessAmount, 0),
       ).to.be.revertedWithCustomError(vault, "ERC20InsufficientBalance");
     });
 
@@ -225,7 +224,7 @@ describe("OEMVault", function () {
       await oem.connect(user1).approve(await vault.getAddress(), stakeAmount);
 
       await expect(
-        vault.connect(user1).stake(stakeAmount),
+        vault.connect(user1).stake(stakeAmount, 0),
       ).to.be.revertedWithCustomError(vault, "VaultPausedTransfers");
     });
 
@@ -273,7 +272,7 @@ describe("OEMVault", function () {
       const stakeAmount = ethers.parseUnits("1000", 18);
       await oem.connect(admin).approve(await vault.getAddress(), stakeAmount);
 
-      await vault.connect(admin).stake(stakeAmount);
+      await vault.connect(admin).stake(stakeAmount, 0);
 
       // First deposit gets 1:1 shares (no decimals offset in this vault implementation)
       const expectedShares = stakeAmount;
@@ -287,12 +286,12 @@ describe("OEMVault", function () {
       const stakeAmount2 = ethers.parseUnits("1000", 18);
 
       await oem.connect(user1).approve(await vault.getAddress(), stakeAmount1);
-      await vault.connect(user1).stake(stakeAmount1);
+      await vault.connect(user1).stake(stakeAmount1, 0);
 
       const shares1 = await vault.balanceOf(user1.address);
 
       await oem.connect(user2).approve(await vault.getAddress(), stakeAmount2);
-      await vault.connect(user2).stake(stakeAmount2);
+      await vault.connect(user2).stake(stakeAmount2, 0);
 
       const shares2 = await vault.balanceOf(user2.address);
 
@@ -311,7 +310,7 @@ describe("OEMVault", function () {
 
       const user2SharesBefore = await vault.balanceOf(user2.address);
 
-      await vault.connect(user1).stakeFor(user2.address, stakeAmount);
+      await vault.connect(user1).stakeFor(user2.address, stakeAmount, 0);
 
       const user2SharesAfter = await vault.balanceOf(user2.address);
       expect(user2SharesAfter).to.be.gt(user2SharesBefore);
@@ -324,7 +323,7 @@ describe("OEMVault", function () {
 
       await oem.connect(user1).approve(await vault.getAddress(), stakeAmount);
 
-      await expect(vault.connect(user1).stakeFor(user2.address, stakeAmount))
+      await expect(vault.connect(user1).stakeFor(user2.address, stakeAmount, 0))
         .to.emit(vault, "Staked")
         .withArgs(
           user2.address,
@@ -341,7 +340,7 @@ describe("OEMVault", function () {
       const user2BalanceBefore = await oem.balanceOf(user2.address);
 
       await oem.connect(user1).approve(await vault.getAddress(), stakeAmount);
-      await vault.connect(user1).stakeFor(user2.address, stakeAmount);
+      await vault.connect(user1).stakeFor(user2.address, stakeAmount, 0);
 
       const user1BalanceAfter = await oem.balanceOf(user1.address);
       const user2BalanceAfter = await oem.balanceOf(user2.address);
@@ -354,7 +353,7 @@ describe("OEMVault", function () {
       const { vault, user1, user2 } = await loadFixture(deployFixture);
 
       await expect(
-        vault.connect(user1).stakeFor(user2.address, 0),
+        vault.connect(user1).stakeFor(user2.address, 0, 0),
       ).to.be.revertedWithCustomError(vault, "InvalidAmount");
     });
 
@@ -368,7 +367,7 @@ describe("OEMVault", function () {
       await oem.connect(user1).approve(await vault.getAddress(), stakeAmount);
 
       await expect(
-        vault.connect(user1).stakeFor(user2.address, stakeAmount),
+        vault.connect(user1).stakeFor(user2.address, stakeAmount, 0),
       ).to.be.revertedWithCustomError(vault, "VaultPausedTransfers");
     });
   });
@@ -380,7 +379,7 @@ describe("OEMVault", function () {
 
       const stakeAmount = ethers.parseUnits("1000", 18);
       await oem.connect(user1).approve(await vault.getAddress(), stakeAmount);
-      await vault.connect(user1).stake(stakeAmount);
+      await vault.connect(user1).stake(stakeAmount, 0);
 
       const shares = await vault.balanceOf(user1.address);
 
@@ -596,7 +595,7 @@ describe("OEMVault", function () {
 
       const stakeAmount = ethers.parseUnits("1000", 18);
       await oem.connect(user1).approve(await vault.getAddress(), stakeAmount);
-      await vault.connect(user1).stake(stakeAmount);
+      await vault.connect(user1).stake(stakeAmount, 0);
 
       return fixture;
     }
@@ -783,7 +782,7 @@ describe("OEMVault", function () {
 
       const totalAssetsBefore = await vault.totalAssets();
 
-      await vault.connect(user1).stake(stakeAmount);
+      await vault.connect(user1).stake(stakeAmount, 0);
 
       const totalAssetsAfter = await vault.totalAssets();
       expect(totalAssetsAfter - totalAssetsBefore).to.equal(stakeAmount);
@@ -803,7 +802,7 @@ describe("OEMVault", function () {
 
       const stakeAmount = ethers.parseUnits("1000", 18);
       await oem.connect(user1).approve(await vault.getAddress(), stakeAmount);
-      await vault.connect(user1).stake(stakeAmount);
+      await vault.connect(user1).stake(stakeAmount, 0);
 
       const shares = await vault.balanceOf(user1.address);
       const assets = await vault.convertToAssets(shares);
@@ -825,7 +824,7 @@ describe("OEMVault", function () {
 
       const stakeAmount = ethers.parseUnits("1000", 18);
       await oem.connect(user1).approve(await vault.getAddress(), stakeAmount);
-      await vault.connect(user1).stake(stakeAmount);
+      await vault.connect(user1).stake(stakeAmount, 0);
 
       const shares = await vault.balanceOf(user1.address);
       const assets = await vault.previewRedeem(shares);
@@ -908,7 +907,7 @@ describe("OEMVault", function () {
       await oem
         .connect(attacker)
         .approve(await vault.getAddress(), attackAmount);
-      await vault.connect(attacker).stake(attackAmount);
+      await vault.connect(attacker).stake(attackAmount, 0);
 
       // Attacker tries to donate to inflate share price
       const donationAmount = ethers.parseUnits("100000", 18);
@@ -918,7 +917,7 @@ describe("OEMVault", function () {
 
       // Victim deposits
       await oem.connect(victim).approve(await vault.getAddress(), victimAmount);
-      await vault.connect(victim).stake(victimAmount);
+      await vault.connect(victim).stake(victimAmount, 0);
 
       const victimShares = await vault.balanceOf(victim.address);
 
@@ -940,7 +939,7 @@ describe("OEMVault", function () {
       await oem.connect(user1).approve(await vault.getAddress(), stakeAmount);
 
       const blockBefore = await ethers.provider.getBlockNumber();
-      await vault.connect(user1).stake(stakeAmount);
+      await vault.connect(user1).stake(stakeAmount, 0);
       const blockAfter = await ethers.provider.getBlockNumber();
 
       // Verify block was mined (Hardhat auto-mines, so blocks will be different)
@@ -959,13 +958,14 @@ describe("OEMVault", function () {
         .approve(await vault.getAddress(), stakeAmount * 2n);
 
       // First stake
-      await vault.connect(user1).stake(stakeAmount);
+      await vault.connect(user1).stake(stakeAmount, 0);
 
       // Mine a new block
       await ethers.provider.send("evm_mine", []);
 
       // Second stake in different block should succeed
-      await expect(vault.connect(user1).stake(stakeAmount)).to.not.be.reverted;
+      await expect(vault.connect(user1).stake(stakeAmount, 0)).to.not.be
+        .reverted;
     });
 
     it("should protect against flash loans via lastActionBlock mechanism", async function () {
@@ -979,7 +979,8 @@ describe("OEMVault", function () {
       await oem.connect(user1).approve(await vault.getAddress(), stakeAmount);
 
       // Stake should succeed
-      await expect(vault.connect(user1).stake(stakeAmount)).to.not.be.reverted;
+      await expect(vault.connect(user1).stake(stakeAmount, 0)).to.not.be
+        .reverted;
 
       // In production, if two transactions are in the same block, the second would revert
       // with FlashLoanDetected error. The protection mechanism is verified in the contract code.
@@ -993,7 +994,7 @@ describe("OEMVault", function () {
       await oem.connect(minter).mint(user1.address, 1n);
       await oem.connect(user1).approve(await vault.getAddress(), 1n);
 
-      await vault.connect(user1).stake(1n);
+      await vault.connect(user1).stake(1n, 0);
 
       expect(await vault.balanceOf(user1.address)).to.be.gt(0);
     });
@@ -1017,7 +1018,7 @@ describe("OEMVault", function () {
         await oem.connect(minter).mint(user1.address, largeAmount);
         await oem.connect(user1).approve(await vault.getAddress(), largeAmount);
 
-        await expect(vault.connect(user1).stake(largeAmount)).to.not.be
+        await expect(vault.connect(user1).stake(largeAmount, 0)).to.not.be
           .reverted;
       } else {
         // Skip test if no cap available
@@ -1031,7 +1032,7 @@ describe("OEMVault", function () {
       const balance = await oem.balanceOf(user1.address);
       await oem.connect(user1).approve(await vault.getAddress(), balance);
 
-      await vault.connect(user1).stake(balance);
+      await vault.connect(user1).stake(balance, 0);
 
       expect(await oem.balanceOf(user1.address)).to.equal(0);
     });
@@ -1043,7 +1044,7 @@ describe("OEMVault", function () {
 
       for (let i = 0; i < 10; i++) {
         await oem.connect(user1).approve(await vault.getAddress(), stakeAmount);
-        await vault.connect(user1).stake(stakeAmount);
+        await vault.connect(user1).stake(stakeAmount, 0);
       }
 
       const totalShares = await vault.balanceOf(user1.address);
@@ -1057,7 +1058,7 @@ describe("OEMVault", function () {
 
       // User1 stakes
       await oem.connect(user1).approve(await vault.getAddress(), stakeAmount);
-      await vault.connect(user1).stake(stakeAmount);
+      await vault.connect(user1).stake(stakeAmount, 0);
 
       const shares1 = await vault.balanceOf(user1.address);
 
@@ -1066,7 +1067,7 @@ describe("OEMVault", function () {
 
       // User2 stakes same amount
       await oem.connect(user2).approve(await vault.getAddress(), stakeAmount);
-      await vault.connect(user2).stake(stakeAmount);
+      await vault.connect(user2).stake(stakeAmount, 0);
 
       const shares2 = await vault.balanceOf(user2.address);
 
@@ -1151,7 +1152,7 @@ describe("OEMVault", function () {
       // 1. Stake
       const stakeAmount = ethers.parseUnits("1000", 18);
       await oem.connect(user1).approve(await vault.getAddress(), stakeAmount);
-      await vault.connect(user1).stake(stakeAmount);
+      await vault.connect(user1).stake(stakeAmount, 0);
 
       const shares = await vault.balanceOf(user1.address);
       expect(shares).to.be.gt(0);

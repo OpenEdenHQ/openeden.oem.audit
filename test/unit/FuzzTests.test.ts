@@ -197,7 +197,7 @@ describe("Fuzz Tests", function () {
             await oem
               .connect(user1)
               .approve(await vault.getAddress(), stakeAmount);
-            await vault.connect(user1).stake(stakeAmount);
+            await vault.connect(user1).stake(stakeAmount, 0);
 
             expect(await vault.balanceOf(user1.address)).to.be.gt(0);
           }
@@ -221,7 +221,7 @@ describe("Fuzz Tests", function () {
               await oem
                 .connect(user1)
                 .approve(await vault.getAddress(), stakeAmount);
-              await vault.connect(user1).stake(stakeAmount);
+              await vault.connect(user1).stake(stakeAmount, 0);
             }
           }
         }
@@ -238,7 +238,7 @@ describe("Fuzz Tests", function () {
 
         const stakeAmount = ethers.parseUnits("5000", 18);
         await oem.connect(user1).approve(await vault.getAddress(), stakeAmount);
-        await vault.connect(user1).stake(stakeAmount);
+        await vault.connect(user1).stake(stakeAmount, 0);
 
         return fixture;
       }
@@ -303,7 +303,7 @@ describe("Fuzz Tests", function () {
 
         const stakeAmount = ethers.parseUnits("5000", 18);
         await oem.connect(user1).approve(await vault.getAddress(), stakeAmount);
-        await vault.connect(user1).stake(stakeAmount);
+        await vault.connect(user1).stake(stakeAmount, 0);
 
         return fixture;
       }
@@ -348,7 +348,7 @@ describe("Fuzz Tests", function () {
         // Stake large amount
         const totalStake = ethers.parseUnits("50000", 18);
         await oem.connect(user1).approve(await vault.getAddress(), totalStake);
-        await vault.connect(user1).stake(totalStake);
+        await vault.connect(user1).stake(totalStake, 0);
 
         // Queue random number of redemptions (5-15)
         const redemptionCount = Math.floor(Math.random() * 10) + 5;
@@ -397,7 +397,7 @@ describe("Fuzz Tests", function () {
                     await oem
                       .connect(user)
                       .approve(await vault.getAddress(), stakeAmount);
-                    await vault.connect(user).stake(stakeAmount);
+                    await vault.connect(user).stake(stakeAmount, 0);
                   }
                 }
               }
@@ -492,7 +492,7 @@ describe("Fuzz Tests", function () {
       for (let i = 0; i < 5; i++) {
         const stakeAmount = ethers.parseUnits("1000", 18);
         await oem.connect(user1).approve(await vault.getAddress(), stakeAmount);
-        await vault.connect(user1).stake(stakeAmount);
+        await vault.connect(user1).stake(stakeAmount, 0);
 
         const shares = await vault.balanceOf(user1.address);
         if (shares > 0) {
@@ -527,10 +527,9 @@ describe("Fuzz Tests", function () {
       const { vault, oem, burner, user1 } = await loadFixture(deployFixture);
 
       // Zero amount operations should revert with InvalidAmount
-      await expect(vault.connect(user1).stake(0)).to.be.revertedWithCustomError(
-        vault,
-        "InvalidAmount",
-      );
+      await expect(
+        vault.connect(user1).stake(0, 0),
+      ).to.be.revertedWithCustomError(vault, "InvalidAmount");
 
       await expect(
         oem.connect(burner).burn(user1.address, 0),

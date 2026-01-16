@@ -307,11 +307,13 @@ contract Express is
      * @param _asset The address of the underlying token
      * @param _to The address to receive the minted token
      * @param _amount The amount of underlying token to deposit
+     * @param _minMintOut Minimum amount of tokens to receive (slippage protection)
      */
     function instantMint(
         address _asset,
         address _to,
-        uint256 _amount
+        uint256 _amount,
+        uint256 _minMintOut
     ) external whenNotPausedMint {
         address from = _msgSender();
         if (!kycList[from] || !kycList[_to]) revert NotInKycList(from, _to);
@@ -337,6 +339,9 @@ contract Express is
         uint256 feeAmt;
         uint256 mintAmt;
         (netAmt, feeAmt, mintAmt) = previewMint(_asset, _amount);
+
+        if (mintAmt < _minMintOut)
+            revert InsufficientOutput(mintAmt, _minMintOut);
 
         if (feeAmt > 0) {
             IERC20(_asset).safeTransferFrom(from, feeTo, feeAmt);
