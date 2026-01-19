@@ -10,7 +10,6 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   const { get } = deployerDeployments;
   const { deployer } = await getNamedAccounts();
 
-  console.log('🚀 Deploying OpenEden Multi Strategy Yield Contracts');
   console.log('📌 Deployer address:', deployer);
 
   // ============================================
@@ -18,27 +17,32 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
   // ============================================
 
   // OEM Token parameters
-  const oemName = 'OpenEden Multi Strategy Yield';
-  const oemSymbol = 'OEM';
-  const oemIssueCap = ethers.parseUnits('10000000', 18); // 10M OEM cap (0 = unlimited)
+  const oemName = 'Portfolio of Risk-adjusted Investment Strategy Mix';
+  const oemSymbol = 'PRISM';
+  const oemIssueCap = ethers.parseUnits('100000000', 18); // 100M OEM cap (0 = unlimited)
 
   // RedemptionQueue parameters
   const redemptionDelay = 3 * 60; // 3 minutes in seconds
 
   // OEMVault parameters
-  const vaultName = 'Staked OpenEden Multi Strategy Yield';
-  const vaultSymbol = 'xOEM';
+  const vaultName = 'Staked Portfolio of Risk-adjusted Investment Strategy Mix';
+  const vaultSymbol = 'xPRISM';
 
   // Express parameters
-  const mintMinimum = ethers.parseUnits('10', 18); // 10 OEM minimum
-  const redeemMinimum = ethers.parseUnits('5', 18); // 5 OEM minimum
-  const firstDepositAmount = ethers.parseUnits('20', 18); // 20 OEM first deposit
+  const mintMinimum = ethers.parseUnits('1', 18); // 1 PRISM minimum
+  const redeemMinimum = ethers.parseUnits('1', 18); // 1 PRISM minimum
+  const firstDepositAmount = ethers.parseUnits('10', 18); // 10 PRISM first deposit
 
   // Addresses (set these or use deployer as placeholder)
   const treasury = deployer; // TODO: Set actual treasury address
   const feeTo = deployer; // TODO: Set actual fee recipient address
   // const usdoAddress = ethers.ZeroAddress; // TODO: Set actual USDO token address (or deploy MockERC20)
-  const usdoAddress = '0x1A09b6C25E02f118bd028024C563e7EADeD64167';
+
+  // sepolia 
+  // const usdoAddress = '0x1A09b6C25E02f118bd028024C563e7EADeD64167';
+
+  // mainnet
+  const usdoAddress = '0x8238884Ec9668Ef77B90C6dfF4D1a9F4F4823BFe';
 
   // ============================================
   // 1. Deploy MockERC20 (if needed for testing)
