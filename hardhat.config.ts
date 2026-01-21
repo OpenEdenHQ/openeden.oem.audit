@@ -132,7 +132,7 @@ const config: HardhatUserConfig = {
       ...(PRIVATE_KEY ? { accounts: [PRIVATE_KEY] } : {}),
     },
     mainnet: {
-      url: `https://eth-mainnet.g.alchemy.com/v2/${ALCHEMY_KEY}`,
+      url: QUICK_NODE_RPC || `https://eth-mainnet.g.alchemy.com/v2/${ALCHEMY_KEY}`,
       chainId: 1,
       ...(PRIVATE_KEY ? { accounts: [PRIVATE_KEY] } : {}),
     },
@@ -168,6 +168,15 @@ const config: HardhatUserConfig = {
   namedAccounts: {
     deployer: {
       default: 0, // Use the first account as deployer by default
+      mainnet: 0,
+      sepolia: 0,
+      base_mainnet: 0,
+      base_sepolia: 0,
+      arb_mainnet: 0,
+      arbi_sepolia: 0,
+      bsc_mainnet: 0,
+      bsc_testnet: 0,
+      kairos: 0,
     },
   },
 };
